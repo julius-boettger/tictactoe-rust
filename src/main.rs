@@ -121,7 +121,30 @@ fn get_board_status(board: &Board) -> Status {
             }
         }
         // return None if there were no winners
-        return None;
+        None
+    }
+
+    /// returns the first field that won a diagonal on the board (if present)
+    fn winner_in_diagonal(board: &Board) -> Option<&Field> {
+        // for all diagonals
+        // diagonal_factor will be used to get the two possible diagonals
+        for diagonal_factor in [0, BOARD_SIZE - 1] {
+            // get diagonal from board
+            let mut diagonal: [&Field; BOARD_SIZE] = [&Empty; BOARD_SIZE];
+            // for all rows/columns
+            for i in 0 .. BOARD_SIZE {
+                // use diagonal factor to get major and minor diagonal values
+                diagonal[i] = &board[i][i.abs_diff(diagonal_factor)];
+            }
+            // get potential winner
+            let winner = someone_won(diagonal.to_vec());
+            // return winner if present
+            if winner.is_some() {
+                return winner;
+            }
+        }
+        // return None if there were no winners
+        None
     }
 
     // TODO combine possible results into array for figuring out winner?
@@ -136,6 +159,11 @@ fn get_board_status(board: &Board) -> Status {
         return Status::SomeoneWon(*winner_in_column.expect(""));
     }
 
+    let winner_in_diagonal = winner_in_diagonal(board);
+    if winner_in_diagonal.is_some() {
+        return Status::SomeoneWon(*winner_in_diagonal.expect(""));
+    }
+
     Status::StillPlaying
 }
 
@@ -144,8 +172,8 @@ fn main() {
     let mut board: Board = [[Empty; BOARD_SIZE]; BOARD_SIZE];
 
     // make some moves
-    board[0][2] = Circle;
-    board[1][2] = Circle;
+    board[0][0] = Circle;
+    board[1][1] = Circle;
     board[2][2] = Circle;
 
     print_board(&board);
