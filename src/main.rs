@@ -4,6 +4,7 @@
  */
 
 use core::fmt;
+use itertools::Itertools;
 
 // constants and type aliases
 const BOARD_SIZE: usize = 3;
@@ -18,11 +19,11 @@ enum Field {
     Cross,
     Circle
 }
+use Field::*;
 
 impl Field {
     /// get a character for each variant
     fn symbol(&self) -> char {
-        use Field::*;
         match *self {
             Empty => '_',
             Cross => 'X',
@@ -45,11 +46,11 @@ enum Status {
     SomeoneWon(Field),
     StillPlaying
 }
+use Status::*;
 
 // format status as message on display
 impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Status::*;
         write!(f, "{}", match self {
             Draw => String::from("its a draw :("),
             StillPlaying => String::from("the game is still going..."),
@@ -68,7 +69,6 @@ fn print_board(board: &Board) {
     }
 }
 
-use itertools::Itertools;
 
 /// get the current status of a board
 fn get_board_status(board: &Board) -> Status {
@@ -113,9 +113,6 @@ fn get_board_status(board: &Board) -> Status {
 }
 
 fn main() {
-    use crate::Field::*;
-    use crate::Status::*;
-
     // new empty board
     let mut board: Board = [[Empty; BOARD_SIZE]; BOARD_SIZE];
 
