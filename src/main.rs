@@ -10,8 +10,9 @@ use itertools::Itertools;
 const BOARD_SIZE: usize = 3;
 type Board = [[Field; BOARD_SIZE]; BOARD_SIZE];
 
-/// a field of a board which can be empty
-/// or have some kind of symbol on it
+/// a field of a board which can be Empty
+/// or have some kind of symbol on it.
+/// a non-Empty field can be considered a player.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 enum Field {
     /// field is empty
@@ -43,7 +44,7 @@ impl fmt::Display for Field {
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 enum Status {
     Draw,
-    SomeoneWon(Field),
+    SomeoneWon(&Field), 
     StillPlaying
 }
 use Status::*;
@@ -68,7 +69,6 @@ fn print_board(board: &Board) {
         println!();
     }
 }
-
 
 /// get the current status of a board
 fn get_board_status(board: &Board) -> Status {
@@ -147,21 +147,19 @@ fn get_board_status(board: &Board) -> Status {
         None
     }
 
-    // TODO combine possible results into array for figuring out winner?
+    // get all winners
+    let winners = [
+        winner_in_row(board),
+        winner_in_column(board),
+        winner_in_diagonal(board)
+    ].iter()
+    // filter out None's
+    .filter(|&option| option.is_some())
+    .collect_vec();
 
-    let winner_in_row = winner_in_row(board);
-    if winner_in_row.is_some() {
-        return Status::SomeoneWon(*winner_in_row.expect(""));
-    }
-
-    let winner_in_column = winner_in_column(board);
-    if winner_in_column.is_some() {
-        return Status::SomeoneWon(*winner_in_column.expect(""));
-    }
-
-    let winner_in_diagonal = winner_in_diagonal(board);
-    if winner_in_diagonal.is_some() {
-        return Status::SomeoneWon(*winner_in_diagonal.expect(""));
+    // return the first winner if there are winners
+    if winners.len() != 0 {
+        return SomeoneWon(winners[0].expect(""));
     }
 
     Status::StillPlaying
