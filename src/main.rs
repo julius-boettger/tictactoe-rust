@@ -42,15 +42,15 @@ impl fmt::Display for Field {
 
 /// current status of the game
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-enum Status {
+enum Status<'a> {
     Draw,
-    SomeoneWon(&Field), 
+    SomeoneWon(&'a Field), 
     StillPlaying
 }
 use Status::*;
 
 // format status as message on display
-impl fmt::Display for Status {
+impl<'a> fmt::Display for Status<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", match self {
             Draw => String::from("its a draw :("),
@@ -148,11 +148,12 @@ fn get_board_status(board: &Board) -> Status {
     }
 
     // get all winners
-    let winners = [
+    let unfiltered_winners = [
         winner_in_row(board),
         winner_in_column(board),
         winner_in_diagonal(board)
-    ].iter()
+    ];
+    let winners = unfiltered_winners.iter()
     // filter out None's
     .filter(|&option| option.is_some())
     .collect_vec();
