@@ -73,7 +73,7 @@ fn print_board(board: &Board) {
 /// get the current status of a board
 fn get_board_status(board: &Board) -> Status {
     /// return the field that won a row/column/diagonal (if present)
-    fn someone_won(fields: Vec<&Field>) -> Option<&Field> {
+    fn someone_won<'a>(fields: &[&'a Field]) -> Option<&'a Field> {
         let unique_fields = fields.iter()
             .unique()
             // dereference once
@@ -89,43 +89,34 @@ fn get_board_status(board: &Board) -> Status {
         Some(field)
     }
 
-    /// returns the first field that won a row on the board (if present)
-    fn winner_in_row(board: &Board) -> Option<&Field> {
-        // vector containing all winners (of all rows)
-        let winners = board.iter()
-            // map each row to its potential winner
-            .map(|row| someone_won(row.iter().collect_vec()))
-            // filter out None's
-            .filter(|option| option.is_some())
-            .collect_vec();
-        // return None if there were no winners
-        if winners.len() == 0 { return None; }
-        // return first winner
-        else { return winners[0]; }
+    /// returns rows of board
+    fn get_rows(board: &Board) -> Vec<[&Field; BOARD_SIZE]> {
+        // make an effort to get the right return type
+        board.iter()
+            .map(|row|
+                row.map(|field| &field)
+            )
+            .collect_vec()
     }
 
-    /// returns the first field that won a column on the board (if present)
-    fn winner_in_column(board: &Board) -> Option<&Field> {
+    /// returns columns of board
+    fn get_columns(board: &Board) -> Vec<[&Field; BOARD_SIZE]> {
+        let mut columns = Vec::new();
         // for all columns
         for col_i in 0 .. BOARD_SIZE {
             // get column from board
-            let mut column: [&Field; BOARD_SIZE] = [&Empty; BOARD_SIZE];
+            let mut column = [&Empty; BOARD_SIZE];
             for row_i in 0 .. BOARD_SIZE {
                 column[row_i] = &board[row_i][col_i];
             }
-            // get potential winner
-            let winner = someone_won(column.to_vec());
-            // return winner if present
-            if winner.is_some() {
-                return winner;
-            }
+            columns.push(column);
         }
-        // return None if there were no winners
-        None
+        columns
     }
 
-    /// returns the first field that won a diagonal on the board (if present)
-    fn winner_in_diagonal(board: &Board) -> Option<&Field> {
+    /// returns diagonals of board
+    fn get_diagonals(board: &Board) -> Vec<[&Field; BOARD_SIZE]> {
+        let mut diagonals = Vec::new();
         // for all diagonals
         // diagonal_factor will be used to get the two possible diagonals
         for diagonal_factor in [0, BOARD_SIZE - 1] {
@@ -136,24 +127,21 @@ fn get_board_status(board: &Board) -> Status {
                 // use diagonal factor to get major and minor diagonal values
                 diagonal[i] = &board[i][i.abs_diff(diagonal_factor)];
             }
-            // get potential winner
-            let winner = someone_won(diagonal.to_vec());
-            // return winner if present
-            if winner.is_some() {
-                return winner;
-            }
+            diagonals.push(diagonal)
         }
-        // return None if there were no winners
-        None
+        diagonals
     }
 
-    // get all winners
-    let unfiltered_winners = [
-        winner_in_row(board),
-        winner_in_column(board),
-        winner_in_diagonal(board)
-    ];
-    let winners = unfiltered_winners.iter()
+    // get all relevant arrays of fields of the board (rows, columns, diagonals)
+    let mut relevant_board_lines = Vec::new();
+    relevant_board_lines.append(&mut get_rows(board));
+    relevant_board_lines.append(&mut get_columns(board));
+    relevant_board_lines.append(&mut get_diagonals(board));
+
+    // check all relevant board lines for winners
+    let winners = relevant_board_lines.iter()
+    // map to potential winner
+    .map(|line| someone_won(line))
     // filter out None's
     .filter(|&option| option.is_some())
     .collect_vec();
