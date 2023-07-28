@@ -1,13 +1,14 @@
 /* TODO's
  * - give expect("") real messages
  * - row.iter.collect_vec() could be better?
+ * - create more players, have variable to decide how many should be used
  */
 
 use core::fmt;
 use itertools::Itertools;
 
 // constants and type aliases
-const BOARD_SIZE: usize = 3;
+const BOARD_SIZE: usize = 4;
 type Board = [[Field; BOARD_SIZE]; BOARD_SIZE];
 
 /// a field of a board which can be Empty
@@ -53,7 +54,7 @@ use Status::*;
 impl<'a> fmt::Display for Status<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", match self {
-            Draw => String::from("its a draw :("),
+            Draw => String::from("its a draw! no player can win anymore."),
             StillPlaying => String::from("the game is still going..."),
             SomeoneWon(winner) => format!("{:?} won!", winner)
         })
@@ -76,9 +77,12 @@ fn get_board_status(board: &Board) -> Status {
     fn someone_won<'a>(line: &[&'a Field]) -> Option<&'a Field> {
         // check if the whole line consists of the same field
         let only_field_in_line = line.iter().all_equal_value();
-        // if so, return it as the winner
+        // if so and its not Empty, return it as the winner
         if only_field_in_line.is_ok() {
-            return Some(only_field_in_line.ok().expect(""));
+            let winner = *only_field_in_line.ok().expect("");
+            if *winner != Empty {
+                return Some(winner);
+            }
         }
         // else return None
         None
@@ -87,8 +91,13 @@ fn get_board_status(board: &Board) -> Status {
     /// check if a line can not be won by anyone anymore (draw)
     fn is_draw(line: &[&Field]) -> bool {
         // a line is a draw if there are at least two unique fields on it (excluding Empty)
-        // TODO implement function
-        false
+        line.iter()
+            // unique fields
+            .unique()
+            // filter out empty fields
+            .filter(|&field| **field != Empty)
+            // return true if at least two unique fields
+            .collect_vec().len() >= 2
     }
 
     /// returns rows of board
@@ -156,6 +165,19 @@ fn get_board_status(board: &Board) -> Status {
         return SomeoneWon(winners[0].expect(""));
     }
 
+    // check the board for a draw (all lines have to be draws)
+    let draw = relevant_board_lines.iter()
+        // map to draw in line (true or false)
+        .map(|line| is_draw(line))
+        // check if all values are equal
+        .all_equal_value();
+
+    // if all lines have the same draw value and it is true
+    if draw.is_ok() && draw.ok().expect("") {
+        return Draw;
+    }
+
+    // the game is still going if neither a winner or a draw could be determined
     Status::StillPlaying
 }
 
@@ -163,10 +185,21 @@ fn main() {
     // new empty board
     let mut board: Board = [[Empty; BOARD_SIZE]; BOARD_SIZE];
 
-    // make some moves
+    // make some moves to construct a draw
     board[0][0] = Circle;
-    board[1][1] = Circle;
-    board[2][2] = Circle;
+    board[1][0] = Cross;
+    board[2][0] = Circle;
+    board[3][0] = Cross;
+    board[0][3] = Cross;
+    board[1][3] = Circle;
+    board[2][3] = Cross;
+    board[3][3] = Circle;
+    board[0][1] = Cross;
+    board[0][2] = Circle;
+    board[3][1] = Circle;
+    board[3][2] = Cross;
+    board[1][1] = Cross;
+    board[1][2] = Circle;
 
     print_board(&board);
     println!("{}", get_board_status(&board));
