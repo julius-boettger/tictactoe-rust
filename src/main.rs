@@ -72,31 +72,36 @@ fn print_board(board: &Board) {
 
 /// get the current status of a board
 fn get_board_status(board: &Board) -> Status {
-    /// return the field that won a row/column/diagonal (if present)
-    fn someone_won<'a>(fields: &[&'a Field]) -> Option<&'a Field> {
-        let unique_fields = fields.iter()
-            .unique()
-            // dereference once
-            .map(|field| *field)
-            .collect_vec();
-        // return if not just one unique element
-        if unique_fields.len() != 1 { return None; }
-        // get only field
-        let field = unique_fields[0];
-        // return if field is Empty
-        if *field == Field::Empty { return None; }
-        // return field that won
-        Some(field)
+    /// return the field that won a line (row/column/diagonal, if present)
+    fn someone_won<'a>(line: &[&'a Field]) -> Option<&'a Field> {
+        // check if the whole line consists of the same field
+        let only_field_in_line = line.iter().all_equal_value();
+        // if so, return it as the winner
+        if only_field_in_line.is_ok() {
+            return Some(only_field_in_line.ok().expect(""));
+        }
+        // else return None
+        None
+    }
+
+    /// check if a line can not be won by anyone anymore (draw)
+    fn is_draw(line: &[&Field]) -> bool {
+        // a line is a draw if there are at least two unique fields on it (excluding Empty)
+        // TODO implement function
+        false
     }
 
     /// returns rows of board
     fn get_rows(board: &Board) -> Vec<[&Field; BOARD_SIZE]> {
         // make an effort to get the right return type
         board.iter()
-            .map(|row|
-                row.map(|field| &field)
-            )
-            .collect_vec()
+            .map(|row| {
+                let mut array = [&Empty; BOARD_SIZE];
+                for i in 0 .. BOARD_SIZE {
+                    array[i] = &row[i];
+                }
+                array
+            }).collect_vec()
     }
 
     /// returns columns of board
