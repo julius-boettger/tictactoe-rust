@@ -1,7 +1,7 @@
 /* TODO's
  * - give expect("") real messages
  * - row.iter.collect_vec() could be better?
- * - create more players, have variable to decide how many should be used
+ * - variable to decide how many players should be used
  */
 
 use core::fmt;
@@ -18,18 +18,35 @@ type Board = [[Field; BOARD_SIZE]; BOARD_SIZE];
 enum Field {
     /// field is empty
     Empty,
-    Cross,
-    Circle
+    X,
+    O,
+    Z,
+    G
 }
 use Field::*;
 
 impl Field {
     /// get a character for each variant
     fn symbol(&self) -> char {
+        // implementation has to match from_symbol()!
         match *self {
-            Empty => '_',
-            Cross => 'X',
-            Circle => 'O'
+            X     => 'X',
+            O     => 'O',
+            Z     => 'Z',
+            G     => 'G',
+            Empty => ' '
+        }
+    }
+    /// determine the variant by its character.
+    /// an unknown character will result in Empty
+    fn from_symbol(symbol: char) -> Field {
+        // implementation has to match symbol()!
+        match symbol {
+            'X' => X,
+            'O' => O,
+            'Z' => Z,
+            'G' => G,
+             _  => Empty
         }
     }
 }
@@ -186,20 +203,20 @@ fn main() {
     let mut board: Board = [[Empty; BOARD_SIZE]; BOARD_SIZE];
 
     // make some moves to construct a draw
-    board[0][0] = Circle;
-    board[1][0] = Cross;
-    board[2][0] = Circle;
-    board[3][0] = Cross;
-    board[0][3] = Cross;
-    board[1][3] = Circle;
-    board[2][3] = Cross;
-    board[3][3] = Circle;
-    board[0][1] = Cross;
-    board[0][2] = Circle;
-    board[3][1] = Circle;
-    board[3][2] = Cross;
-    board[1][1] = Cross;
-    board[1][2] = Circle;
+    board[0][0] = O;
+    board[1][0] = X;
+    board[2][0] = O;
+    board[3][0] = X;
+    board[0][3] = X;
+    board[1][3] = O;
+    board[2][3] = X;
+    board[3][3] = O;
+    board[0][1] = X;
+    board[0][2] = O;
+    board[3][1] = O;
+    board[3][2] = X;
+    board[1][1] = X;
+    board[1][2] = O;
 
     print_board(&board);
     println!("{}", get_board_status(&board));
