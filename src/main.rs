@@ -211,7 +211,7 @@ fn get_input(info: &str) -> String {
     buffer.trim_end().into()
 }
 
-fn main() {
+fn run_game() {
     // new empty board
     let mut board: Board = [[Empty; BOARD_SIZE]; BOARD_SIZE];
 
@@ -233,4 +233,8 @@ fn main() {
 
     print_board(&board);
     println!("{}", get_board_status(&board));
+}
+
+fn main() {
+    run_game();
 }
