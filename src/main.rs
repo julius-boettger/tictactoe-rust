@@ -79,9 +79,9 @@ impl fmt::Display for Status {
 
 /// print the board using the field display format and spacers
 fn print_board(board: &Board) {
-    for i in 0..BOARD_SIZE {
-        for j in 0..BOARD_SIZE {
-            print!("{}  ", board[i][j]);
+    for row in 0..BOARD_SIZE {
+        for col in 0..BOARD_SIZE {
+            print!("{}  ", board[row][col]);
         }
         println!();
     }
@@ -92,7 +92,7 @@ fn get_board_status(board: &Board) -> Status {
     /// return the field that won a line (row/column/diagonal, if present)
     fn someone_won(line: &[Field]) -> Option<Field> {
         // check if the whole line consists of the same field
-        let only_field_in_line = line.iter().all_equal_value();
+        let only_field_in_line: Result<&Field, _> = line.iter().all_equal_value();
         // if so and its not Empty, return it as the winner
         if let Ok(winner) = only_field_in_line {
             if *winner != F::Empty {
@@ -110,7 +110,7 @@ fn get_board_status(board: &Board) -> Status {
             // unique fields
             .unique()
             // filter out empty fields
-            .filter(|&field| *field != F::Empty)
+            .filter(|&&field| field != F::Empty)
             // return true if at least two unique fields
             .collect_vec().len() >= 2
     }
@@ -118,13 +118,13 @@ fn get_board_status(board: &Board) -> Status {
     /// returns rows of board
     fn get_rows(board: &Board) -> Vec<Line> {
         board.iter()
-             .map(|row| *row)
+             .map(|&row| row)
              .collect_vec()
     }
 
     /// returns columns of board
     fn get_columns(board: &Board) -> Vec<Line> {
-        let mut columns = Vec::new();
+        let mut columns: Vec<Line> = Vec::new();
         // for all columns
         for col_i in 0 .. BOARD_SIZE {
             // get column from board
@@ -144,11 +144,11 @@ fn get_board_status(board: &Board) -> Status {
         // diagonal_factor will be used to get the two possible diagonals
         for diagonal_factor in [0, BOARD_SIZE - 1] {
             // get diagonal from board
-            let mut diagonal = [F::Empty; BOARD_SIZE];
+            let mut diagonal: Line = [F::Empty; BOARD_SIZE];
             // for all rows/columns
-            for i in 0 .. BOARD_SIZE {
+            for line in 0 .. BOARD_SIZE {
                 // use diagonal factor to get major and minor diagonal values
-                diagonal[i] = board[i][i.abs_diff(diagonal_factor)];
+                diagonal[line] = board[line][line.abs_diff(diagonal_factor)];
             }
             diagonals.push(diagonal)
         }
@@ -163,16 +163,16 @@ fn get_board_status(board: &Board) -> Status {
 
     // check all relevant board lines for winners
     let winners = relevant_board_lines.iter()
-    // map to potential winner
-    .map(|line| someone_won(line))
-    // filter out None's
-    .filter(|&option| option.is_some())
-    // unwrap
-    .map(|option| option.unwrap())
-    .collect_vec();
+        // map to potential winner
+        .map(|line| someone_won(line))
+        // filter out None's
+        .filter(|&option| option.is_some())
+        // unwrap
+        .map(|option| option.unwrap())
+        .collect_vec();
 
     // return the first winner if there are winners
-    if winners.len() != 0 {
+    if !winners.is_empty() {
         return S::SomeoneWon(winners[0]);
     }
 
