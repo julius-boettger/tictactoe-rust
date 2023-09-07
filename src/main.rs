@@ -58,15 +58,15 @@ impl fmt::Display for Field {
 
 /// current status of the game
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-enum Status<'a> {
+enum Status {
     Draw,
-    SomeoneWon(&'a Field), 
+    SomeoneWon(Field), 
     StillPlaying
 }
 use Status as S;
 
 // format status as message on display
-impl<'a> fmt::Display for Status<'a> {
+impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", match self {
             S::Draw => String::from("its a draw! no player can win anymore."),
@@ -89,13 +89,13 @@ fn print_board(board: &Board) {
 /// get the current status of a board
 fn get_board_status(board: &Board) -> Status {
     /// return the field that won a line (row/column/diagonal, if present)
-    fn someone_won<'a>(line: &[&'a Field]) -> Option<&'a Field> {
+    fn someone_won(line: &[Field]) -> Option<Field> {
         // check if the whole line consists of the same field
         let only_field_in_line = line.iter().all_equal_value();
         // if so and its not Empty, return it as the winner
         if let Ok(winner) = only_field_in_line {
-            if **winner != F::Empty {
-                return Some(winner);
+            if *winner != F::Empty {
+                return Some(*winner);
             }
         }
         // else return None
@@ -103,39 +103,33 @@ fn get_board_status(board: &Board) -> Status {
     }
 
     /// check if a line can not be won by anyone anymore (draw)
-    fn is_draw(line: &[&Field]) -> bool {
+    fn is_draw(line: &[Field]) -> bool {
         // a line is a draw if there are at least two unique fields on it (excluding Empty)
         line.iter()
             // unique fields
             .unique()
             // filter out empty fields
-            .filter(|&field| **field != F::Empty)
+            .filter(|&field| *field != F::Empty)
             // return true if at least two unique fields
             .collect_vec().len() >= 2
     }
 
     /// returns rows of board
-    fn get_rows(board: &Board) -> Vec<[&Field; BOARD_SIZE]> {
-        // make an effort to get the right return type
+    fn get_rows(board: &Board) -> Vec<[Field; BOARD_SIZE]> {
         board.iter()
-            .map(|row| {
-                let mut array = [&F::Empty; BOARD_SIZE];
-                for i in 0 .. BOARD_SIZE {
-                    array[i] = &row[i];
-                }
-                array
-            }).collect_vec()
+             .map(|row| *row)
+             .collect_vec()
     }
 
     /// returns columns of board
-    fn get_columns(board: &Board) -> Vec<[&Field; BOARD_SIZE]> {
+    fn get_columns(board: &Board) -> Vec<[Field; BOARD_SIZE]> {
         let mut columns = Vec::new();
         // for all columns
         for col_i in 0 .. BOARD_SIZE {
             // get column from board
-            let mut column = [&F::Empty; BOARD_SIZE];
+            let mut column = [F::Empty; BOARD_SIZE];
             for row_i in 0 .. BOARD_SIZE {
-                column[row_i] = &board[row_i][col_i];
+                column[row_i] = board[row_i][col_i];
             }
             columns.push(column);
         }
@@ -143,17 +137,17 @@ fn get_board_status(board: &Board) -> Status {
     }
 
     /// returns diagonals of board
-    fn get_diagonals(board: &Board) -> Vec<[&Field; BOARD_SIZE]> {
+    fn get_diagonals(board: &Board) -> Vec<[Field; BOARD_SIZE]> {
         let mut diagonals = Vec::new();
         // for all diagonals
         // diagonal_factor will be used to get the two possible diagonals
         for diagonal_factor in [0, BOARD_SIZE - 1] {
             // get diagonal from board
-            let mut diagonal: [&Field; BOARD_SIZE] = [&F::Empty; BOARD_SIZE];
+            let mut diagonal = [F::Empty; BOARD_SIZE];
             // for all rows/columns
             for i in 0 .. BOARD_SIZE {
                 // use diagonal factor to get major and minor diagonal values
-                diagonal[i] = &board[i][i.abs_diff(diagonal_factor)];
+                diagonal[i] = board[i][i.abs_diff(diagonal_factor)];
             }
             diagonals.push(diagonal)
         }
