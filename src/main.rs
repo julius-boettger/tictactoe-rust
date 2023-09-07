@@ -23,30 +23,28 @@ enum Field {
     Z,
     G
 }
-use Field::*;
+use Field as F;
 
-impl Field {
-    /// get a character for each variant
-    fn symbol(&self) -> char {
-        // implementation has to match from_symbol()!
-        match *self {
-            X     => 'X',
-            O     => 'O',
-            Z     => 'Z',
-            G     => 'G',
-            Empty => ' '
+// convert each field to a character (and reverse)
+impl From<char> for Field {
+    fn from(symbol: char) -> Self {
+        match symbol {
+            'X' => F::X,
+            'O' => F::O,
+            'Z' => F::Z,
+            'G' => F::G,
+             _  => F::Empty
         }
     }
-    /// determine the variant by its character.
-    /// an unknown character will result in Empty
-    fn from_symbol(symbol: char) -> Field {
-        // implementation has to match symbol()!
-        match symbol {
-            'X' => X,
-            'O' => O,
-            'Z' => Z,
-            'G' => G,
-             _  => Empty
+}
+impl From<Field> for char {
+    fn from(field: Field) -> Self {
+        match field {
+            F::X     => 'X',
+            F::O     => 'O',
+            F::Z     => 'Z',
+            F::G     => 'G',
+            F::Empty => ' '
         }
     }
 }
@@ -54,7 +52,7 @@ impl Field {
 // format field as specific symbol on display
 impl fmt::Display for Field {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.symbol())
+        write!(f, "{}", char::from(*self))
     }
 }
 
@@ -65,15 +63,15 @@ enum Status<'a> {
     SomeoneWon(&'a Field), 
     StillPlaying
 }
-use Status::*;
+use Status as S;
 
 // format status as message on display
 impl<'a> fmt::Display for Status<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", match self {
-            Draw => String::from("its a draw! no player can win anymore."),
-            StillPlaying => String::from("the game is still going..."),
-            SomeoneWon(winner) => format!("{:?} won!", winner)
+            S::Draw => String::from("its a draw! no player can win anymore."),
+            S::StillPlaying => String::from("the game is still going..."),
+            S::SomeoneWon(winner) => format!("{} won!", winner)
         })
     }
 }
@@ -95,9 +93,8 @@ fn get_board_status(board: &Board) -> Status {
         // check if the whole line consists of the same field
         let only_field_in_line = line.iter().all_equal_value();
         // if so and its not Empty, return it as the winner
-        if only_field_in_line.is_ok() {
-            let winner = *only_field_in_line.ok().expect("");
-            if *winner != Empty {
+        if let Ok(winner) = only_field_in_line {
+            if **winner != F::Empty {
                 return Some(winner);
             }
         }
@@ -112,7 +109,7 @@ fn get_board_status(board: &Board) -> Status {
             // unique fields
             .unique()
             // filter out empty fields
-            .filter(|&field| **field != Empty)
+            .filter(|&field| **field != F::Empty)
             // return true if at least two unique fields
             .collect_vec().len() >= 2
     }
@@ -122,7 +119,7 @@ fn get_board_status(board: &Board) -> Status {
         // make an effort to get the right return type
         board.iter()
             .map(|row| {
-                let mut array = [&Empty; BOARD_SIZE];
+                let mut array = [&F::Empty; BOARD_SIZE];
                 for i in 0 .. BOARD_SIZE {
                     array[i] = &row[i];
                 }
@@ -136,7 +133,7 @@ fn get_board_status(board: &Board) -> Status {
         // for all columns
         for col_i in 0 .. BOARD_SIZE {
             // get column from board
-            let mut column = [&Empty; BOARD_SIZE];
+            let mut column = [&F::Empty; BOARD_SIZE];
             for row_i in 0 .. BOARD_SIZE {
                 column[row_i] = &board[row_i][col_i];
             }
@@ -152,7 +149,7 @@ fn get_board_status(board: &Board) -> Status {
         // diagonal_factor will be used to get the two possible diagonals
         for diagonal_factor in [0, BOARD_SIZE - 1] {
             // get diagonal from board
-            let mut diagonal: [&Field; BOARD_SIZE] = [&Empty; BOARD_SIZE];
+            let mut diagonal: [&Field; BOARD_SIZE] = [&F::Empty; BOARD_SIZE];
             // for all rows/columns
             for i in 0 .. BOARD_SIZE {
                 // use diagonal factor to get major and minor diagonal values
@@ -175,11 +172,13 @@ fn get_board_status(board: &Board) -> Status {
     .map(|line| someone_won(line))
     // filter out None's
     .filter(|&option| option.is_some())
+    // unwrap
+    .map(|option| option.unwrap())
     .collect_vec();
 
     // return the first winner if there are winners
     if winners.len() != 0 {
-        return SomeoneWon(winners[0].expect(""));
+        return S::SomeoneWon(winners[0]);
     }
 
     // check the board for a draw (all lines have to be draws)
@@ -190,8 +189,10 @@ fn get_board_status(board: &Board) -> Status {
         .all_equal_value();
 
     // if all lines have the same draw value and it is true
-    if draw.is_ok() && draw.ok().expect("") {
-        return Draw;
+    if let Ok(value) = draw {
+        if value {
+            return S::Draw;
+        }
     }
 
     // the game is still going if neither a winner or a draw could be determined
@@ -212,7 +213,7 @@ fn get_input(info: &str) -> String {
 }
 
 fn construct_board(content: Option<Vec<Field>>) -> Board {
-    let mut board: Board = [[Empty; BOARD_SIZE]; BOARD_SIZE];
+    let mut board: Board = [[F::Empty; BOARD_SIZE]; BOARD_SIZE];
 
     let content = match content {
         Some(value) => value,
@@ -233,6 +234,7 @@ fn construct_board(content: Option<Vec<Field>>) -> Board {
 }
 
 fn run_game() {
+    use Field::*;
     let board = construct_board(Some(vec![
         X, O, O, O,
         X, O, O, X,
