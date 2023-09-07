@@ -9,7 +9,8 @@ use itertools::Itertools;
 
 // constants and type aliases
 const BOARD_SIZE: usize = 4;
-type Board = [[Field; BOARD_SIZE]; BOARD_SIZE];
+type Line = [Field; BOARD_SIZE];
+type Board = [Line; BOARD_SIZE];
 
 /// a field of a board which can be Empty
 /// or have some kind of symbol on it.
@@ -115,19 +116,19 @@ fn get_board_status(board: &Board) -> Status {
     }
 
     /// returns rows of board
-    fn get_rows(board: &Board) -> Vec<[Field; BOARD_SIZE]> {
+    fn get_rows(board: &Board) -> Vec<Line> {
         board.iter()
              .map(|row| *row)
              .collect_vec()
     }
 
     /// returns columns of board
-    fn get_columns(board: &Board) -> Vec<[Field; BOARD_SIZE]> {
+    fn get_columns(board: &Board) -> Vec<Line> {
         let mut columns = Vec::new();
         // for all columns
         for col_i in 0 .. BOARD_SIZE {
             // get column from board
-            let mut column = [F::Empty; BOARD_SIZE];
+            let mut column: Line = [F::Empty; BOARD_SIZE];
             for row_i in 0 .. BOARD_SIZE {
                 column[row_i] = board[row_i][col_i];
             }
@@ -137,8 +138,8 @@ fn get_board_status(board: &Board) -> Status {
     }
 
     /// returns diagonals of board
-    fn get_diagonals(board: &Board) -> Vec<[Field; BOARD_SIZE]> {
-        let mut diagonals = Vec::new();
+    fn get_diagonals(board: &Board) -> Vec<Line> {
+        let mut diagonals: Vec<Line> = Vec::new();
         // for all diagonals
         // diagonal_factor will be used to get the two possible diagonals
         for diagonal_factor in [0, BOARD_SIZE - 1] {
