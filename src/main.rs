@@ -211,25 +211,35 @@ fn get_input(info: &str) -> String {
     buffer.trim_end().into()
 }
 
-fn run_game() {
-    // new empty board
+fn construct_board(content: Option<Vec<Field>>) -> Board {
     let mut board: Board = [[Empty; BOARD_SIZE]; BOARD_SIZE];
 
-    // make some moves to construct a draw
-    board[0][0] = O;
-    board[1][0] = X;
-    board[2][0] = O;
-    board[3][0] = X;
-    board[0][3] = X;
-    board[1][3] = O;
-    board[2][3] = X;
-    board[3][3] = O;
-    board[0][1] = X;
-    board[0][2] = O;
-    board[3][1] = O;
-    board[3][2] = X;
-    board[1][1] = X;
-    board[1][2] = O;
+    let content = match content {
+        Some(value) => value,
+        None => return board
+    };
+
+    if content.len() == BOARD_SIZE.pow(2) {
+        let mut index = 0;
+        for row in 0..BOARD_SIZE {
+            for col in 0..BOARD_SIZE {
+                board[row][col] = content[index];
+                index += 1;
+            }
+        }
+    }
+
+    board
+}
+
+fn run_game() {
+    let board = construct_board(Some(vec![
+        X, O, O, O,
+        X, O, O, X,
+        X, O, O, O,
+        X, O, X, O,
+    ]));
+    construct_board(None);
 
     print_board(&board);
     println!("{}", get_board_status(&board));
