@@ -230,14 +230,12 @@ fn construct_board(content: Option<Vec<Field>>) -> Board {
 
 fn run_game() {
     use Field::*;
-    let board = construct_board(Some(vec![
+    let board: Board = construct_board(Some(vec![
         X, O, O, O,
         X, O, O, X,
         X, O, O, O,
         X, O, X, O,
     ]));
-    construct_board(None);
-
     print_board(&board);
     println!("{}", get_board_status(&board));
 }
