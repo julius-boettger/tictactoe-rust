@@ -136,6 +136,11 @@ pub fn construct_board(content: Option<Vec<Field>>) -> Board {
 }
 
 pub fn run_game() {
+
+    if BOARD_SIZE < 3 {
+        panic!("BOARD_SIZE is {}, needs to be at least 3", BOARD_SIZE);
+    }
+
     use Field::*;
     let board: Board = construct_board(Some(vec![
         X, O, O, O,
@@ -145,4 +150,62 @@ pub fn run_game() {
     ]));
     view::output::print_board(&board);
     println!("{}", get_board_status(&board));
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn empty_board() {
+        let board = construct_board(None);
+        for row in 0..BOARD_SIZE {
+            for col in 0..BOARD_SIZE {
+                if board[row][col] != F::Empty {
+                    panic!();
+                }
+            }
+        }
+        assert_eq!(get_board_status(&board), S::StillPlaying);
+    }
+
+    #[test]
+    fn multiple_winners() {
+        let mut board = construct_board(None);
+        board[0] = [F::X; BOARD_SIZE];
+        board[1] = [F::O; BOARD_SIZE];
+        assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+    }
+
+    #[test]
+    fn winner_in_rows() {
+        for winner_row in 0..BOARD_SIZE {
+            let mut board = construct_board(None);
+            board[winner_row] = [F::X; BOARD_SIZE];
+            assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+        }
+    }
+
+    #[test]
+    fn winner_in_cols() {
+        for winner_col in 0..BOARD_SIZE {
+            let mut board = construct_board(None);
+            for row in 0..BOARD_SIZE {
+                board[row][winner_col] = F::X;
+            }
+            assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+        }
+    }
+
+    #[test]
+    fn winner_in_diagonals() {
+        for diagonal_factor in [0, BOARD_SIZE - 1] {
+            let mut board = construct_board(None);
+            for line in 0 .. BOARD_SIZE {
+                board[line][line.abs_diff(diagonal_factor)] = F::X;
+            }
+            assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+        }
+    }
 }
