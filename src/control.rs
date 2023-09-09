@@ -143,6 +143,6 @@ pub fn run_game() {
         X, O, O, O,
         X, O, X, O,
     ]));
-    view::print_board(&board);
+    view::output::print_board(&board);
     println!("{}", get_board_status(&board));
 }
