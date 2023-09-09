@@ -7,113 +7,123 @@ use crate::view;
 use crate::constants::*;
 use itertools::Itertools;
 
-/// get the current status of a board
-pub fn get_board_status(board: &Board) -> Status {
-    /// return the field that won a line (row/column/diagonal, if present)
-    fn someone_won(line: &[Field]) -> Option<Field> {
-        // check if the whole line consists of the same field
-        let only_field_in_line: Result<&Field, _> = line.iter().all_equal_value();
-        // if so and its not Empty, return it as the winner
-        if let Ok(winner) = only_field_in_line {
-            if *winner != F::Empty {
-                return Some(*winner);
-            }
+/// return the field that won a line (row/column/diagonal, if present)
+fn get_line_winner(line: &[Field]) -> Option<Field> {
+    let only_field_in_line: Result<&Field, _> = line.iter().all_equal_value();
+    if let Ok(winner) = only_field_in_line {
+        if *winner != F::Empty {
+            return Some(*winner);
         }
-        // else return None
-        None
     }
+    None
+}
 
-    /// check if a line can not be won by anyone anymore (draw)
-    fn is_draw(line: &[Field]) -> bool {
-        // a line is a draw if there are at least two unique fields on it (excluding Empty)
-        line.iter()
-            // unique fields
-            .unique()
-            // filter out empty fields
-            .filter(|&&field| field != F::Empty)
-            // return true if at least two unique fields
-            .collect_vec().len() >= 2
-    }
+/// check if a line can not be won by anyone anymore (draw)
+fn get_line_draw(line: &[Field]) -> bool {
+    // a line is a draw if there are at least two unique fields on it (excluding Empty)
+    line.iter()
+        .unique()
+        .filter(|&&field| field != F::Empty)
+        .collect_vec()
+        .len() >= 2
+}
 
-    /// returns rows of board
-    fn get_rows(board: &Board) -> Vec<Line> {
-        board.iter()
-             .map(|&row| row)
-             .collect_vec()
-    }
+/// returns rows of board
+fn get_rows(board: &Board) -> Vec<Line> {
+    board.iter()
+         .map(|&row| row)
+         .collect_vec()
+}
 
-    /// returns columns of board
-    fn get_columns(board: &Board) -> Vec<Line> {
-        let mut columns: Vec<Line> = Vec::new();
-        // for all columns
-        for col_i in 0 .. BOARD_SIZE {
-            // get column from board
-            let mut column: Line = [F::Empty; BOARD_SIZE];
-            for row_i in 0 .. BOARD_SIZE {
-                column[row_i] = board[row_i][col_i];
-            }
-            columns.push(column);
+/// returns columns of board
+fn get_columns(board: &Board) -> Vec<Line> {
+    let mut columns: Vec<Line> = Vec::new();
+    for col_i in 0 .. BOARD_SIZE {
+        let mut column: Line = [F::Empty; BOARD_SIZE];
+        for row_i in 0 .. BOARD_SIZE {
+            column[row_i] = board[row_i][col_i];
         }
-        columns
+        columns.push(column);
     }
+    columns
+}
 
-    /// returns diagonals of board
-    fn get_diagonals(board: &Board) -> Vec<Line> {
-        let mut diagonals: Vec<Line> = Vec::new();
-        // for all diagonals
-        // diagonal_factor will be used to get the two possible diagonals
-        for diagonal_factor in [0, BOARD_SIZE - 1] {
-            // get diagonal from board
-            let mut diagonal: Line = [F::Empty; BOARD_SIZE];
-            // for all rows/columns
-            for line in 0 .. BOARD_SIZE {
-                // use diagonal factor to get major and minor diagonal values
-                diagonal[line] = board[line][line.abs_diff(diagonal_factor)];
-            }
-            diagonals.push(diagonal)
+/// returns diagonals of board
+fn get_diagonals(board: &Board) -> Vec<Line> {
+    let mut diagonals: Vec<Line> = Vec::new();
+    // diagonal_factor will be used to get the two possible diagonals
+    for diagonal_factor in [0, BOARD_SIZE - 1] {
+        // get diagonal from board
+        let mut diagonal: Line = [F::Empty; BOARD_SIZE];
+        // for all rows/columns
+        for line in 0 .. BOARD_SIZE {
+            // use diagonal factor to get major and minor diagonal values
+            diagonal[line] = board[line][line.abs_diff(diagonal_factor)];
         }
-        diagonals
+        diagonals.push(diagonal)
     }
+    diagonals
+}
 
-    // get all relevant arrays of fields of the board (rows, columns, diagonals)
-    let mut relevant_board_lines = Vec::new();
-    relevant_board_lines.append(&mut get_rows(board));
-    relevant_board_lines.append(&mut get_columns(board));
-    relevant_board_lines.append(&mut get_diagonals(board));
+/// get all lines of the board (rows, columns and diagonals)
+fn get_board_lines(board: &Board) -> Vec<Line> {
+    let mut lines = Vec::new();
+    lines.append(&mut get_rows(board));
+    lines.append(&mut get_columns(board));
+    lines.append(&mut get_diagonals(board));
+    lines
+}
 
-    // check all relevant board lines for winners
-    let winners = relevant_board_lines.iter()
-        // map to potential winner
-        .map(|line| someone_won(line))
-        // filter out None's
+/// get first winner of board
+fn get_board_winner(board_lines: &Vec<Line>) -> Option<Field> {
+    let winners = board_lines.iter()
+        .map(|line| get_line_winner(line))
         .filter(|&option| option.is_some())
-        // unwrap
         .map(|option| option.unwrap())
         .collect_vec();
 
-    // return the first winner if there are winners
     if !winners.is_empty() {
-        return S::SomeoneWon(winners[0]);
+        return Some(winners[0]);
     }
 
+    None
+}
+
+/// check if board is a draw
+fn get_board_draw(board_lines: &Vec<Line>) -> bool {
     // check the board for a draw (all lines have to be draws)
-    let draw = relevant_board_lines.iter()
-        // map to draw in line (true or false)
-        .map(|line| is_draw(line))
-        // check if all values are equal
+    let draw = board_lines.iter()
+        .map(|line| get_line_draw(line))
         .all_equal_value();
 
     // if all lines have the same draw value and it is true
     if let Ok(value) = draw {
         if value {
-            return S::Draw;
+            return true;
         }
     }
 
-    // the game is still going if neither a winner or a draw could be determined
+    false
+}
+
+/// get the current status of a board
+pub fn get_board_status(board: &Board) -> Status {
+
+    let board_lines = get_board_lines(board);
+
+    if let Some(field) = get_board_winner(&board_lines) {
+        return S::SomeoneWon(field);
+    }
+
+    if get_board_draw(&board_lines) {
+        return S::Draw;
+    }
+
+    // the game is still going if neither a winner nor a draw could be determined
     Status::StillPlaying
 }
 
+/// construct a board. if content is `Some` it must be a vector with length `BOARD_SIZE.pow(2)`.
 pub fn construct_board(content: Option<Vec<Field>>) -> Board {
     let mut board: Board = [[F::Empty; BOARD_SIZE]; BOARD_SIZE];
 
@@ -135,6 +145,7 @@ pub fn construct_board(content: Option<Vec<Field>>) -> Board {
     board
 }
 
+/// run a game of tic tac toe
 pub fn run_game() {
 
     if BOARD_SIZE < 3 {
