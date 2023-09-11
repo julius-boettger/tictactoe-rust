@@ -152,13 +152,10 @@ pub fn run_game() {
         panic!("BOARD_SIZE is {}, needs to be at least 3", BOARD_SIZE);
     }
 
-    use Field::*;
-    let board: Board = construct_board(Some(vec![
-        X, O, O, O,
-        X, O, O, X,
-        X, O, O, O,
-        X, O, X, O,
-    ]));
+    let board: Board = construct_board(Some(
+        [F::X; BOARD_SIZE.pow(2)].to_vec()
+    ));
+    view::output::print_board_template();
     view::output::print_board(&board);
     println!("{}", get_board_status(&board));
 }
