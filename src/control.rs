@@ -1,6 +1,4 @@
-use crate::model::Field;
-use Field as F;
-use crate::model::Status;
+use crate::model::*;
 use Status as S;
 
 use crate::view;
@@ -8,11 +6,11 @@ use crate::constants::*;
 use itertools::Itertools;
 
 /// return the field that won a line (row/column/diagonal, if present)
-fn get_line_winner(line: &[Field]) -> Option<Field> {
+fn get_line_winner(line: &[Field]) -> Field {
     let only_field_in_line: Result<&Field, _> = line.iter().all_equal_value();
     if let Ok(winner) = only_field_in_line {
-        if *winner != F::Empty {
-            return Some(*winner);
+        if winner.is_some() {
+            return *winner;
         }
     }
     None
@@ -23,7 +21,7 @@ fn get_line_draw(line: &[Field]) -> bool {
     // a line is a draw if there are at least two unique fields on it (excluding Empty)
     line.iter()
         .unique()
-        .filter(|&&field| field != F::Empty)
+        .filter(|&&field| field.is_some())
         .collect_vec()
         .len() >= 2
 }
@@ -39,7 +37,7 @@ fn get_rows(board: &Board) -> Vec<Line> {
 fn get_columns(board: &Board) -> Vec<Line> {
     let mut columns: Vec<Line> = Vec::new();
     for col_i in 0 .. BOARD_SIZE {
-        let mut column: Line = [F::Empty; BOARD_SIZE];
+        let mut column: Line = [None; BOARD_SIZE];
         for row_i in 0 .. BOARD_SIZE {
             column[row_i] = board[row_i][col_i];
         }
@@ -54,7 +52,7 @@ fn get_diagonals(board: &Board) -> Vec<Line> {
     // diagonal_factor will be used to get the two possible diagonals
     for diagonal_factor in [0, BOARD_SIZE - 1] {
         // get diagonal from board
-        let mut diagonal: Line = [F::Empty; BOARD_SIZE];
+        let mut diagonal: Line = [None; BOARD_SIZE];
         // for all rows/columns
         for line in 0 .. BOARD_SIZE {
             // use diagonal factor to get major and minor diagonal values
@@ -75,7 +73,7 @@ fn get_board_lines(board: &Board) -> Vec<Line> {
 }
 
 /// get first winner of board
-fn get_board_winner(board_lines: &Vec<Line>) -> Option<Field> {
+fn get_board_winner(board_lines: &Vec<Line>) -> Field {
     let winners = board_lines.iter()
         .map(|line| get_line_winner(line))
         .filter(|&option| option.is_some())
@@ -125,7 +123,7 @@ pub fn get_board_status(board: &Board) -> Status {
 
 /// construct a board. if content is `Some` it must be a vector with length `BOARD_SIZE.pow(2)`.
 pub fn construct_board(content: Option<Vec<Field>>) -> Board {
-    let mut board: Board = [[F::Empty; BOARD_SIZE]; BOARD_SIZE];
+    let mut board: Board = [[None; BOARD_SIZE]; BOARD_SIZE];
 
     let content = match content {
         Some(value) => value,
@@ -153,7 +151,7 @@ pub fn run_game() {
     }
 
     let board: Board = construct_board(Some(
-        [F::X; BOARD_SIZE.pow(2)].to_vec()
+        [Some('X'); BOARD_SIZE.pow(2)].to_vec()
     ));
     view::output::print_board_template();
     view::output::print_board(&board);
@@ -170,7 +168,7 @@ mod tests {
         let board = construct_board(None);
         for row in 0..BOARD_SIZE {
             for col in 0..BOARD_SIZE {
-                if board[row][col] != F::Empty {
+                if board[row][col].is_some() {
                     panic!();
                 }
             }
@@ -181,17 +179,17 @@ mod tests {
     #[test]
     fn multiple_winners() {
         let mut board = construct_board(None);
-        board[0] = [F::X; BOARD_SIZE];
-        board[1] = [F::O; BOARD_SIZE];
-        assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+        board[0] = [Some('X'); BOARD_SIZE];
+        board[1] = [Some('X'); BOARD_SIZE];
+        assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
     }
 
     #[test]
     fn winner_in_rows() {
         for winner_row in 0..BOARD_SIZE {
             let mut board = construct_board(None);
-            board[winner_row] = [F::X; BOARD_SIZE];
-            assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+            board[winner_row] = [Some('X'); BOARD_SIZE];
+            assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
         }
     }
 
@@ -200,9 +198,9 @@ mod tests {
         for winner_col in 0..BOARD_SIZE {
             let mut board = construct_board(None);
             for row in 0..BOARD_SIZE {
-                board[row][winner_col] = F::X;
+                board[row][winner_col] = Some('X');
             }
-            assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+            assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
         }
     }
 
@@ -211,9 +209,9 @@ mod tests {
         for diagonal_factor in [0, BOARD_SIZE - 1] {
             let mut board = construct_board(None);
             for line in 0 .. BOARD_SIZE {
-                board[line][line.abs_diff(diagonal_factor)] = F::X;
+                board[line][line.abs_diff(diagonal_factor)] = Some('X');
             }
-            assert_eq!(get_board_status(&board), S::SomeoneWon(F::X));
+            assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
         }
     }
 }

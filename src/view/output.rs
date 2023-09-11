@@ -1,3 +1,4 @@
+use crate::model::*;
 use crate::constants::*;
 use itertools::Itertools;
 
@@ -6,7 +7,7 @@ pub fn print_board(board: &Board) {
     print_with_board_format(
         board.iter()
         .flatten()
-        .map(|f| f.to_string())
+        .map(|f| f.unwrap_or(' ').to_string())
         .collect_vec(), false
     );
 }
