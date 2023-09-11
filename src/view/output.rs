@@ -20,14 +20,20 @@ pub fn print_board_template() {
     );
 }
 
-/// print content in a board-like format
+/// print content in a board-like format. panics if content
+/// does not have exactly `BOARD_SIZE.pow(2)` elements.
 fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
+    if content.len() != BOARD_SIZE.pow(2) {
+        panic!("content needs to have exactly {} elements", BOARD_SIZE.pow(2));
+    }
+
     // space between prints
     const SPACER: &str = " ";
     // how many spacers should be used between fields of a Board
     const SPACE_REPS: usize = 2;
     // max length of field index
     let field_length = BOARD_SIZE.pow(2).to_string().len();
+
     let mut index = 0;
     for _ in 0..BOARD_SIZE {
         print!("|{}", SPACER);
