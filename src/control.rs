@@ -8,10 +8,8 @@ use itertools::Itertools;
 /// return the field that won a line (row/column/diagonal, if present)
 fn get_line_winner(line: &[Field]) -> Field {
     let only_field_in_line: Result<&Field, _> = line.iter().all_equal_value();
-    if let Ok(winner) = only_field_in_line {
-        if winner.is_some() {
-            return *winner;
-        }
+    if let Ok(Some(winner)) = only_field_in_line {
+        return Some(*winner);
     }
     None
 }
@@ -21,7 +19,7 @@ fn get_line_draw(line: &[Field]) -> bool {
     // a line is a draw if there are at least two unique fields on it (excluding Empty)
     line.iter()
         .unique()
-        .filter(|&&field| field.is_some())
+        .filter(|field| field.is_some())
         .collect_vec()
         .len() >= 2
 }
@@ -76,7 +74,7 @@ fn get_board_lines(board: &Board) -> Vec<Line> {
 fn get_board_winner(board_lines: &Vec<Line>) -> Field {
     let winners = board_lines.iter()
         .map(|line| get_line_winner(line))
-        .filter(|&option| option.is_some())
+        .filter(|field| field.is_some())
         .map(|option| option.unwrap())
         .collect_vec();
 
@@ -166,13 +164,10 @@ mod tests {
     #[test]
     fn empty_board() {
         let board = construct_board(None);
-        for row in 0..BOARD_SIZE {
-            for col in 0..BOARD_SIZE {
-                if board[row][col].is_some() {
-                    panic!();
-                }
-            }
-        }
+        let is_empty = board.iter()
+            .flatten()
+            .all(|field| field.is_none());
+        if !is_empty { panic!("board is not empty"); }
         assert_eq!(get_board_status(&board), S::StillPlaying);
     }
 

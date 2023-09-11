@@ -6,9 +6,11 @@ use itertools::Itertools;
 pub fn print_board(board: &Board) {
     print_with_board_format(
         board.iter()
-        .flatten()
-        .map(|f| f.unwrap_or(' ').to_string())
-        .collect_vec(), false
+            .flatten()
+            .map(|field|
+                field.unwrap_or(' ').to_string())
+            .collect_vec(),
+        false
     );
 }
 
@@ -16,8 +18,9 @@ pub fn print_board(board: &Board) {
 pub fn print_board_template() {
     print_with_board_format(
         (1 ..= BOARD_SIZE.pow(2))
-        .map(|i| i.to_string())
-        .collect_vec(), true
+            .map(|index| index.to_string())
+            .collect_vec(),
+        true
     );
 }
 
