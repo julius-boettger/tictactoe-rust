@@ -1,4 +1,5 @@
 /* TODO's
+ * - replace Field enum with type Option<char>
  * - make game playable through terminal
  * - ask user how many players should be used
  */
