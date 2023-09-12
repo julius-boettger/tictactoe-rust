@@ -1,7 +1,3 @@
-/* TODO's
- * - cycle between players to make moves
- */
-
 mod view;
 mod control;
 mod model;
