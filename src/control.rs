@@ -154,6 +154,22 @@ pub fn place_symbol(board: &mut Board, index: u8, symbol: char) {
     board[row][col] = Some(symbol);
 }
 
+/// prompt player to make a move and parse the result. panic if parsing fails.
+pub fn get_player_move() -> Move {
+    let answer = view::input::get_input("make your move: ");
+    let parts = answer.split(" ").collect_vec();
+    if parts.len() != 2 {
+        panic!("input did not contain exactly one space");
+    }
+    let Ok(index) = parts[0].parse::<u8>() else {
+        panic!("couldnt parse index");
+    };
+    let Ok(symbol) = parts[1].parse::<char>() else {
+        panic!("couldnt parse symbol");
+    };
+    (index, symbol)
+}
+
 /// run a game of tic tac toe
 pub fn run_game() {
 
@@ -161,14 +177,24 @@ pub fn run_game() {
         panic!("BOARD_SIZE is {}, needs to be at least 3", BOARD_SIZE);
     }
 
-    let board: Board = construct_board(None);
+    let mut board: Board = construct_board(None);
 
     use view::*;
 
-    output::clear_terminal();
-    output::print_board_template();
-    output::print_board(&board);
-    println!("{}", get_board_status(&board));
+    // game loop
+    loop {
+        output::clear_terminal();
+
+        output::print_board_template();
+        output::print_board(&board);
+
+        let board_status = get_board_status(&board);
+        println!("{}", board_status);
+        if board_status != S::StillPlaying { break; }
+
+        let player_move = get_player_move();
+        place_symbol(&mut board, player_move.0, player_move.1);
+    }
 }
 
 #[cfg(test)]
