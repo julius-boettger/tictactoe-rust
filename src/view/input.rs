@@ -37,3 +37,21 @@ pub fn get_input_type<T, F>(
     }
     value
 }
+
+/// get a `u8` through stdin after printing `info`.
+/// repeat recursively until input is between `min` and `max` (both included).
+pub fn get_input_u8(info: &str, min: u8, max: u8) -> u8 {
+    let error = format!(
+        "your input could not be recognized as a number between {} and {}",
+        min, max);
+    let predicate = |num: &u8| *num >= min && *num <= max;
+    get_input_type(info, error.as_str(), error.as_str(), predicate)
+}
+
+/// get a `char` through stdin after printing `info`.
+/// repeat recursively until input is not empty or some kind of whitespace.
+pub fn get_input_char(info: &str) -> char {
+    let error = "your input could not be recognized as a single character like 'x'";
+    let predicate = |_: &char| true;
+    get_input_type(info, error, error, predicate)
+}
