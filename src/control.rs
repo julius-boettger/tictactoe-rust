@@ -183,8 +183,8 @@ pub fn run_game() {
     let players = get_players();
 
     // game loop
-    loop {
-        for (player_num, player_symbol) in players.iter().enumerate() {
+    'outer: loop {
+        for player_symbol in players.iter() {
             output::clear_terminal();
 
             output::print_board_template();
@@ -192,9 +192,9 @@ pub fn run_game() {
 
             let board_status = get_board_status(&board);
             println!("{}", board_status);
-            if board_status != S::StillPlaying { break; }
+            if board_status != S::StillPlaying { break 'outer; }
 
-            let info = format!("move player {} (symbol '{}'): ", player_num + 1, player_symbol);
+            let info = format!("move player {}: ", player_symbol);
             let index = input::get_input_u8(info.as_str(), 1, FIELD_COUNT);
             place_symbol(&mut board, index, *player_symbol);
         }
