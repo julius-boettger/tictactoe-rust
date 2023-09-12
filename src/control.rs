@@ -174,6 +174,20 @@ fn get_player_move() -> Move {
     (index, symbol)
 }
 
+/// prompt player to choose number of players with a symbol each.
+/// return vector players presented by a symbol each.
+fn get_players() -> Vec<char> {
+    use view::*;
+    let num_players = input::get_input_u8("number of players: ", 2, MAX_PLAYERS);
+    let mut players: Vec<char> = Vec::new();
+    for player in 1 ..= num_players {
+        let info = format!("symbol for player {}: ", player);
+        let symbol = input::get_input_char(info.as_str(), &players);
+        players.push(symbol);
+    }
+    players
+}
+
 /// run a game of tic tac toe
 pub fn run_game() {
 
@@ -185,6 +199,8 @@ pub fn run_game() {
     let mut board: Board = construct_board(None);
 
     use view::*;
+
+    let players = get_players();
 
     // game loop
     loop {

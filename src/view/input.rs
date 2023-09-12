@@ -49,9 +49,14 @@ pub fn get_input_u8(info: &str, min: u8, max: u8) -> u8 {
 }
 
 /// get a `char` through stdin after printing `info`.
-/// repeat recursively until input is not empty or some kind of whitespace.
-pub fn get_input_char(info: &str) -> char {
-    let error = "your input could not be recognized as a single character like 'x'";
-    let predicate = |_: &char| true;
-    get_input_type(info, error, error, predicate)
+/// repeat recursively until input is not empty, some kind of whitespace or contained in `forbidden`.
+pub fn get_input_char(info: &str, forbidden: &Vec<char>) -> char {
+    let mut error =
+        "your input could not be recognized as a single character like 'x'"
+        .to_string();
+    if !forbidden.is_empty() {
+        error += format!(" that is not one of {:?}", forbidden).as_str();
+    }
+    let predicate = |symbol: &char| !forbidden.contains(symbol);
+    get_input_type(info, error.as_str(), error.as_str(), predicate)
 }
