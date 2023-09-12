@@ -119,7 +119,7 @@ pub fn get_board_status(board: &Board) -> Status {
     Status::StillPlaying
 }
 
-/// construct a board. if content is `Some` it must be a vector with length `BOARD_SIZE.pow(2)`.
+/// construct a board. if content is `Some` it must be a vector with length `FIELD_COUNT`.
 pub fn construct_board(content: Option<Vec<Field>>) -> Board {
     let mut board: Board = [[None; BOARD_USIZE]; BOARD_USIZE];
 
@@ -128,7 +128,7 @@ pub fn construct_board(content: Option<Vec<Field>>) -> Board {
         None => return board
     };
 
-    if content.len() == BOARD_SIZE.pow(2).into() {
+    if content.len() == FIELD_COUNT.into() {
         let mut index = 0;
         for row in BOARD_RANGE {
             for col in BOARD_RANGE {
@@ -141,11 +141,11 @@ pub fn construct_board(content: Option<Vec<Field>>) -> Board {
     board
 }
 
-/// place a symbol on the board. `index` must be `>= 1` and `<= BOARD_SIZE.pow(2)`
+/// place a symbol on the board. `index` must be `>= 1` and `<= FIELD_COUNT`
 pub fn place_symbol(board: &mut Board, index: u8, symbol: char) {
-    if index < 1 || index > BOARD_SIZE.pow(2) {
-        panic!("index is {}, but must be between 1 and BOARD_SIZE.pow(2) (=> {})",
-            index, BOARD_SIZE.pow(2));
+    if index < 1 || index > FIELD_COUNT {
+        panic!("index is {}, but must be between 1 and FIELD_COUNT (=> {})",
+            index, FIELD_COUNT);
     }
 
     let index = index - 1;

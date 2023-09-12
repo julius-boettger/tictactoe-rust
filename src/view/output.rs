@@ -21,7 +21,7 @@ pub fn print_board(board: &Board) {
 /// print board with indices of fields and an arrow pointing downwards underneath
 pub fn print_board_template() {
     print_with_board_format(
-        (1 ..= BOARD_SIZE.pow(2))
+        (1 ..= FIELD_COUNT)
             .map(|index| index.to_string())
             .collect_vec(),
         true
@@ -29,10 +29,10 @@ pub fn print_board_template() {
 }
 
 /// print content in a board-like format. panics if content
-/// does not have exactly `BOARD_SIZE.pow(2)` elements.
+/// does not have exactly `FIELD_COUNT` elements.
 fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
-    if content.len() != BOARD_SIZE.pow(2).into() {
-        panic!("content needs to have exactly {} elements", BOARD_SIZE.pow(2));
+    if content.len() != FIELD_COUNT.into() {
+        panic!("content needs to have exactly {} elements", FIELD_COUNT);
     }
 
     // space between prints
@@ -40,7 +40,7 @@ fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
     // how many spacers should be used between fields of a Board
     const SPACE_REPS: usize = 2;
     // max length of field index
-    let field_length = BOARD_SIZE.pow(2).to_string().len();
+    let field_length = FIELD_COUNT.to_string().len();
 
     let mut index = 0;
     for _ in BOARD_RANGE {
