@@ -2,32 +2,6 @@ use crate::model::*;
 use crate::constants::*;
 use itertools::Itertools;
 
-pub fn clear_terminal() {
-    clearscreen::clear().expect("failed to clear terminal");
-}
-
-/// print the board using the field display format and spacers
-pub fn print_board(board: &Board) {
-    print_with_board_format(
-        board.iter()
-            .flatten()
-            .map(|field|
-                field.unwrap_or(' ').to_string())
-            .collect_vec(),
-        false
-    );
-}
-
-/// print board with indices of fields and an arrow pointing downwards underneath
-pub fn print_board_template() {
-    print_with_board_format(
-        (1 ..= FIELD_COUNT)
-            .map(|index| index.to_string())
-            .collect_vec(),
-        true
-    );
-}
-
 /// print content in a board-like format. panics if content
 /// does not have exactly `FIELD_COUNT` elements.
 fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
@@ -61,4 +35,30 @@ fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
         SPACER.len() * (BOARD_USIZE - 1) * SPACE_REPS +
         2; // pipe chars
     println!("{:-^length$}", "v-v-v", length = line_length);
+}
+
+pub fn clear_terminal() {
+    clearscreen::clear().expect("failed to clear terminal");
+}
+
+/// print the board using the field display format and spacers
+pub fn print_board(board: &Board) {
+    print_with_board_format(
+        board.iter()
+            .flatten()
+            .map(|field|
+                field.unwrap_or(' ').to_string())
+            .collect_vec(),
+        false
+    );
+}
+
+/// print board with indices of fields and an arrow pointing downwards underneath
+pub fn print_board_template() {
+    print_with_board_format(
+        (1 ..= FIELD_COUNT)
+            .map(|index| index.to_string())
+            .collect_vec(),
+        true
+    );
 }

@@ -103,7 +103,7 @@ fn get_board_draw(board_lines: &Vec<Line>) -> bool {
 }
 
 /// get the current status of a board
-pub fn get_board_status(board: &Board) -> Status {
+fn get_board_status(board: &Board) -> Status {
 
     let board_lines = get_board_lines(board);
 
@@ -120,7 +120,7 @@ pub fn get_board_status(board: &Board) -> Status {
 }
 
 /// construct a board. if content is `Some` it must be a vector with length `FIELD_COUNT`.
-pub fn construct_board(content: Option<Vec<Field>>) -> Board {
+fn construct_board(content: Option<Vec<Field>>) -> Board {
     let mut board: Board = [[None; BOARD_USIZE]; BOARD_USIZE];
 
     let content = match content {
@@ -142,7 +142,7 @@ pub fn construct_board(content: Option<Vec<Field>>) -> Board {
 }
 
 /// place a symbol on the board. `index` must be `>= 1` and `<= FIELD_COUNT`
-pub fn place_symbol(board: &mut Board, index: u8, symbol: char) {
+fn place_symbol(board: &mut Board, index: u8, symbol: char) {
     if index < 1 || index > FIELD_COUNT {
         panic!("index is {}, but must be between 1 and FIELD_COUNT (=> {})",
             index, FIELD_COUNT);
@@ -155,7 +155,7 @@ pub fn place_symbol(board: &mut Board, index: u8, symbol: char) {
 }
 
 /// prompt player to make a move and parse the result. panic if parsing fails.
-pub fn get_player_move() -> Move {
+fn get_player_move() -> Move {
     let answer = view::input::get_input("make your move: ");
     let parts = answer.split(" ").collect_vec();
     if parts.len() != 2 {
