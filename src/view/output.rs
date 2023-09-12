@@ -2,6 +2,10 @@ use crate::model::*;
 use crate::constants::*;
 use itertools::Itertools;
 
+pub fn clear_terminal() {
+    clearscreen::clear().expect("failed to clear terminal");
+}
+
 /// print the board using the field display format and spacers
 pub fn print_board(board: &Board) {
     print_with_board_format(
