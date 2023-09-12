@@ -141,9 +141,17 @@ pub fn construct_board(content: Option<Vec<Field>>) -> Board {
     board
 }
 
+/// place a symbol on the board. `index` must be `>= 1` and `<= BOARD_SIZE.pow(2)`
 pub fn place_symbol(board: &mut Board, index: u8, symbol: char) {
+    if index < 1 || index > BOARD_SIZE.pow(2) {
+        panic!("index is {}, but must be between 1 and BOARD_SIZE.pow(2) (=> {})",
+            index, BOARD_SIZE.pow(2));
+    }
+
     let index = index - 1;
-    let col: u8 = index % BOARD_SIZE as u8;
+    let row: usize = (index / BOARD_SIZE).into();
+    let col: usize = (index % BOARD_SIZE).into();
+    board[row][col] = Some(symbol);
 }
 
 /// run a game of tic tac toe
@@ -175,6 +183,14 @@ mod tests {
             .flatten()
             .all(|field| field.is_none());
         if !is_empty { panic!("board is not empty"); }
+        assert_eq!(get_board_status(&board), S::StillPlaying);
+    }
+
+    #[test]
+    fn place_symbol_test() {
+        let mut board = construct_board(None);
+        place_symbol(&mut board, 2, 'X');
+        assert_eq!(board[0][1], Some('X'));
         assert_eq!(get_board_status(&board), S::StillPlaying);
     }
 
