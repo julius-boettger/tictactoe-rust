@@ -154,18 +154,22 @@ fn place_symbol(board: &mut Board, index: u8, symbol: char) {
     board[row][col] = Some(symbol);
 }
 
-/// prompt player to make a move and parse the result. panic if parsing fails.
+/// prompt player to make a move and parse the result.
+/// repeat recursively and print error message if parsing fails.
 fn get_player_move() -> Move {
     let answer = view::input::get_input("make your move: ");
     let parts = answer.split(" ").collect_vec();
     if parts.len() != 2 {
-        panic!("input did not contain exactly one space");
+        println!("{}", "input did not contain exactly one space");
+        return get_player_move();
     }
     let Ok(index) = parts[0].parse::<u8>() else {
-        panic!("couldnt parse index");
+        println!("{}", "couldnt parse index");
+        return get_player_move();
     };
     let Ok(symbol) = parts[1].parse::<char>() else {
-        panic!("couldnt parse symbol");
+        println!("{}", "couldnt parse symbol");
+        return get_player_move();
     };
     (index, symbol)
 }
