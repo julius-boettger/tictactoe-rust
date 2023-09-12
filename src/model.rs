@@ -8,9 +8,6 @@ pub type Field = Option<char>;
 pub type Line = [Field; BOARD_USIZE];
 /// a tictactoe board consisting of multiple Line's
 pub type Board = [Line; BOARD_USIZE];
-/// a move to make on the board, consisting of the field
-/// index (`>= 1 && <= FIELD_COUNT`) and a player symbol
-pub type Move = (u8, char);
 
 /// current status of the game
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

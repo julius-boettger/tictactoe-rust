@@ -154,26 +154,6 @@ fn place_symbol(board: &mut Board, index: u8, symbol: char) {
     board[row][col] = Some(symbol);
 }
 
-/// prompt player to make a move and parse the result.
-/// repeat recursively and print error message if parsing fails.
-fn get_player_move() -> Move {
-    let answer = view::input::get_input("make your move: ");
-    let parts = answer.split(" ").collect_vec();
-    if parts.len() != 2 {
-        println!("{}", "input did not contain exactly one space");
-        return get_player_move();
-    }
-    let Ok(index) = parts[0].parse::<u8>() else {
-        println!("{}", "couldnt parse index");
-        return get_player_move();
-    };
-    let Ok(symbol) = parts[1].parse::<char>() else {
-        println!("{}", "couldnt parse symbol");
-        return get_player_move();
-    };
-    (index, symbol)
-}
-
 /// prompt player to choose number of players with a symbol each.
 /// return vector players presented by a symbol each.
 fn get_players() -> Vec<char> {
@@ -204,17 +184,20 @@ pub fn run_game() {
 
     // game loop
     loop {
-        output::clear_terminal();
+        for (player_num, player_symbol) in players.iter().enumerate() {
+            output::clear_terminal();
 
-        output::print_board_template();
-        output::print_board(&board);
+            output::print_board_template();
+            output::print_board(&board);
 
-        let board_status = get_board_status(&board);
-        println!("{}", board_status);
-        if board_status != S::StillPlaying { break; }
+            let board_status = get_board_status(&board);
+            println!("{}", board_status);
+            if board_status != S::StillPlaying { break; }
 
-        let player_move = get_player_move();
-        place_symbol(&mut board, player_move.0, player_move.1);
+            let info = format!("move player {} (symbol '{}'): ", player_num + 1, player_symbol);
+            let index = input::get_input_u8(info.as_str(), 1, FIELD_COUNT);
+            place_symbol(&mut board, index, *player_symbol);
+        }
     }
 }
 
