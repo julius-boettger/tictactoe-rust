@@ -6,3 +6,5 @@ pub const BOARD_USIZE: usize = BOARD_SIZE as usize;
 pub const BOARD_RANGE: std::ops::Range<usize> = 0 .. BOARD_USIZE;
 /// number of fields on the tictactoe board
 pub const FIELD_COUNT: u8 = BOARD_SIZE.pow(2);
+/// highest amount of allowed players
+pub const MAX_PLAYERS: u8 = FIELD_COUNT / 2;
