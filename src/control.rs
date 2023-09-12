@@ -141,8 +141,9 @@ fn construct_board(content: Option<Vec<Field>>) -> Board {
     board
 }
 
-/// place a symbol on the board. `index` must be `>= 1` and `<= FIELD_COUNT`
-fn place_symbol(board: &mut Board, index: u8, symbol: char) {
+/// place a symbol on the board. `index` must be `>= 1` and `<= FIELD_COUNT`.
+/// return `false` if field of `index` is not empty and the symbol wasn't placed.
+fn place_symbol(board: &mut Board, index: u8, symbol: char) -> bool {
     if index < 1 || index > FIELD_COUNT {
         panic!("index is {}, but must be between 1 and FIELD_COUNT (=> {})",
             index, FIELD_COUNT);
@@ -151,7 +152,11 @@ fn place_symbol(board: &mut Board, index: u8, symbol: char) {
     let index = index - 1;
     let row: usize = (index / BOARD_SIZE).into();
     let col: usize = (index % BOARD_SIZE).into();
+
+    if board[row][col].is_some() { return false; }
+
     board[row][col] = Some(symbol);
+    true
 }
 
 /// prompt player to choose number of players with a symbol each.
@@ -196,7 +201,13 @@ pub fn run_game() {
 
             let info = format!("move player {}: ", player_symbol);
             let index = input::get_input_u8(info.as_str(), 1, FIELD_COUNT);
-            place_symbol(&mut board, index, *player_symbol);
+            let mut symbol_placed = place_symbol(&mut board, index, *player_symbol);
+            // repeat until index points to an empty field
+            while !symbol_placed {
+                println!("that field is not empty!");
+                let index = input::get_input_u8(info.as_str(), 1, FIELD_COUNT);
+                symbol_placed = place_symbol(&mut board, index, *player_symbol);
+            }
         }
     }
 }
