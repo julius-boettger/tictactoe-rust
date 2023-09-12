@@ -1,6 +1,8 @@
 /* TODO's
- * - make game playable through terminal
- * - ask user how many players should be used
+ * - select number of players and their symbols at startup
+ * - cycle between players to make moves
+ * - add error handling for too big BOARD_SIZE
+ * - introduce MAX_PLAYERS
  */
 
 mod view;
