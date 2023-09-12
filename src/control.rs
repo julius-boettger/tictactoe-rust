@@ -173,8 +173,9 @@ pub fn get_player_move() -> Move {
 /// run a game of tic tac toe
 pub fn run_game() {
 
-    if BOARD_SIZE < 3 {
-        panic!("BOARD_SIZE is {}, needs to be at least 3", BOARD_SIZE);
+    let max_board_size: u8 = f32::sqrt(u8::MAX as f32) as u8;
+    if BOARD_SIZE < 3 || BOARD_SIZE > max_board_size {
+        panic!("BOARD_SIZE is {}, but must be between 3 and {}", BOARD_SIZE, max_board_size);
     }
 
     let mut board: Board = construct_board(None);
