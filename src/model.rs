@@ -5,9 +5,9 @@ use crate::constants::*;
 /// a non-empty field can be considered a player.
 pub type Field = Option<char>;
 /// a line of a tictactoe board consisting of multiple Field's
-pub type Line = [Field; BOARD_SIZE];
+pub type Line = [Field; BOARD_USIZE];
 /// a tictactoe board consisting of multiple Line's
-pub type Board = [Line; BOARD_SIZE];
+pub type Board = [Line; BOARD_USIZE];
 
 /// current status of the game
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

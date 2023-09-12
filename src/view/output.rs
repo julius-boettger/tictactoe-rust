@@ -31,7 +31,7 @@ pub fn print_board_template() {
 /// print content in a board-like format. panics if content
 /// does not have exactly `BOARD_SIZE.pow(2)` elements.
 fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
-    if content.len() != BOARD_SIZE.pow(2) {
+    if content.len() != BOARD_SIZE.pow(2).into() {
         panic!("content needs to have exactly {} elements", BOARD_SIZE.pow(2));
     }
 
@@ -43,11 +43,11 @@ fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
     let field_length = BOARD_SIZE.pow(2).to_string().len();
 
     let mut index = 0;
-    for _ in 0..BOARD_SIZE {
+    for _ in BOARD_RANGE {
         print!("|{}", SPACER);
-        for col in 0..BOARD_SIZE {
+        for col in BOARD_RANGE {
             print!("{:>length$}", content[index], length = field_length);
-            if col != BOARD_SIZE - 1 { print!("{}", SPACER.repeat(SPACE_REPS)); }
+            if col != BOARD_USIZE - 1 { print!("{}", SPACER.repeat(SPACE_REPS)); }
             index += 1;
         }
         println!("{}|", SPACER);
@@ -56,9 +56,9 @@ fn print_with_board_format(content: Vec<String>, arrow_underneath: bool) {
     if !arrow_underneath { return; }
 
     let line_length =
-        field_length * BOARD_SIZE + // content
+        field_length * BOARD_USIZE + // content
         SPACER.len() * 2 + // left and right space
-        SPACER.len() * (BOARD_SIZE - 1) * SPACE_REPS +
+        SPACER.len() * (BOARD_USIZE - 1) * SPACE_REPS +
         2; // pipe chars
     println!("{:-^length$}", "v-v-v", length = line_length);
 }

@@ -34,9 +34,9 @@ fn get_rows(board: &Board) -> Vec<Line> {
 /// returns columns of board
 fn get_columns(board: &Board) -> Vec<Line> {
     let mut columns: Vec<Line> = Vec::new();
-    for col_i in 0 .. BOARD_SIZE {
-        let mut column: Line = [None; BOARD_SIZE];
-        for row_i in 0 .. BOARD_SIZE {
+    for col_i in BOARD_RANGE {
+        let mut column: Line = [None; BOARD_USIZE];
+        for row_i in BOARD_RANGE {
             column[row_i] = board[row_i][col_i];
         }
         columns.push(column);
@@ -48,11 +48,11 @@ fn get_columns(board: &Board) -> Vec<Line> {
 fn get_diagonals(board: &Board) -> Vec<Line> {
     let mut diagonals: Vec<Line> = Vec::new();
     // diagonal_factor will be used to get the two possible diagonals
-    for diagonal_factor in [0, BOARD_SIZE - 1] {
+    for diagonal_factor in [0, BOARD_USIZE - 1] {
         // get diagonal from board
-        let mut diagonal: Line = [None; BOARD_SIZE];
+        let mut diagonal: Line = [None; BOARD_USIZE];
         // for all rows/columns
-        for line in 0 .. BOARD_SIZE {
+        for line in BOARD_RANGE {
             // use diagonal factor to get major and minor diagonal values
             diagonal[line] = board[line][line.abs_diff(diagonal_factor)];
         }
@@ -121,17 +121,17 @@ pub fn get_board_status(board: &Board) -> Status {
 
 /// construct a board. if content is `Some` it must be a vector with length `BOARD_SIZE.pow(2)`.
 pub fn construct_board(content: Option<Vec<Field>>) -> Board {
-    let mut board: Board = [[None; BOARD_SIZE]; BOARD_SIZE];
+    let mut board: Board = [[None; BOARD_USIZE]; BOARD_USIZE];
 
     let content = match content {
         Some(value) => value,
         None => return board
     };
 
-    if content.len() == BOARD_SIZE.pow(2) {
+    if content.len() == BOARD_SIZE.pow(2).into() {
         let mut index = 0;
-        for row in 0..BOARD_SIZE {
-            for col in 0..BOARD_SIZE {
+        for row in BOARD_RANGE {
+            for col in BOARD_RANGE {
                 board[row][col] = content[index];
                 index += 1;
             }
@@ -141,6 +141,11 @@ pub fn construct_board(content: Option<Vec<Field>>) -> Board {
     board
 }
 
+pub fn place_symbol(board: &mut Board, index: u8, symbol: char) {
+    let index = index - 1;
+    let col: u8 = index % BOARD_SIZE as u8;
+}
+
 /// run a game of tic tac toe
 pub fn run_game() {
 
@@ -148,11 +153,13 @@ pub fn run_game() {
         panic!("BOARD_SIZE is {}, needs to be at least 3", BOARD_SIZE);
     }
 
-    let board: Board = construct_board(Some(
-        [Some('X'); BOARD_SIZE.pow(2)].to_vec()
-    ));
-    view::output::print_board_template();
-    view::output::print_board(&board);
+    let board: Board = construct_board(None);
+
+    use view::*;
+
+    output::clear_terminal();
+    output::print_board_template();
+    output::print_board(&board);
     println!("{}", get_board_status(&board));
 }
 
@@ -174,25 +181,25 @@ mod tests {
     #[test]
     fn multiple_winners() {
         let mut board = construct_board(None);
-        board[0] = [Some('X'); BOARD_SIZE];
-        board[1] = [Some('X'); BOARD_SIZE];
+        board[0] = [Some('X'); BOARD_USIZE];
+        board[1] = [Some('X'); BOARD_USIZE];
         assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
     }
 
     #[test]
     fn winner_in_rows() {
-        for winner_row in 0..BOARD_SIZE {
+        for winner_row in BOARD_RANGE {
             let mut board = construct_board(None);
-            board[winner_row] = [Some('X'); BOARD_SIZE];
+            board[winner_row] = [Some('X'); BOARD_USIZE];
             assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
         }
     }
 
     #[test]
     fn winner_in_cols() {
-        for winner_col in 0..BOARD_SIZE {
+        for winner_col in BOARD_RANGE {
             let mut board = construct_board(None);
-            for row in 0..BOARD_SIZE {
+            for row in BOARD_RANGE {
                 board[row][winner_col] = Some('X');
             }
             assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
@@ -201,9 +208,9 @@ mod tests {
 
     #[test]
     fn winner_in_diagonals() {
-        for diagonal_factor in [0, BOARD_SIZE - 1] {
+        for diagonal_factor in [0, BOARD_USIZE - 1] {
             let mut board = construct_board(None);
-            for line in 0 .. BOARD_SIZE {
+            for line in BOARD_RANGE {
                 board[line][line.abs_diff(diagonal_factor)] = Some('X');
             }
             assert_eq!(get_board_status(&board), S::SomeoneWon('X'));
