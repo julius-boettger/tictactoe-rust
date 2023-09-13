@@ -212,6 +212,8 @@ pub fn run_game() {
             }
         }
     }
+
+    input::get_input("the game is over. press enter to close this window.");
 }
 
 #[cfg(test)]
