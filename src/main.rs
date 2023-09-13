@@ -2,7 +2,6 @@
  * - extract strings to own module
  * - clear terminal after every error message
  * - make BOARD_SIZE changeable at runtime, e.g. by wrapping game in a struct
- * - update readme
  */
 
 mod view;
