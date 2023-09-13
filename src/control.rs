@@ -196,10 +196,12 @@ pub fn run_game() {
             output::print_board(&board);
 
             let board_status = get_board_status(&board);
-            println!("{}", board_status);
-            if board_status != S::StillPlaying { break 'outer; }
+            if board_status != S::StillPlaying {
+                println!("{}", board_status);
+                break 'outer;
+            }
 
-            let info = format!("move player {}: ", player_symbol);
+            let info = format!("player {}, make your move: ", player_symbol);
             let index = input::get_input_u8(info.as_str(), 1, FIELD_COUNT);
             let mut symbol_placed = place_symbol(&mut board, index, *player_symbol);
             // repeat until index points to an empty field

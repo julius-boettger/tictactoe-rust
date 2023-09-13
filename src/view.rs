@@ -10,9 +10,9 @@ use std::fmt;
 impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", match self {
-            S::Draw => String::from("its a draw! no player can win anymore."),
+            S::Draw => String::from("it's a draw! no player can win anymore."),
             S::StillPlaying => String::from("the game is still going..."),
-            S::SomeoneWon(winner) => format!("{} won!", winner)
+            S::SomeoneWon(winner) => format!("player {} wins!", winner)
         })
     }
 }
