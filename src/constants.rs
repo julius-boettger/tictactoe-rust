@@ -1,5 +1,5 @@
 /// number of rows and columns of the tictactoe board
-pub const BOARD_SIZE: u8 = 4;
+pub const BOARD_SIZE: u8 = 3;
 /// number of rows and columns of the tictactoe board (as `usize`)
 pub const BOARD_USIZE: usize = BOARD_SIZE as usize;
 /// for iterating through board rows or colums
